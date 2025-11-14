@@ -1,6 +1,8 @@
 import { NextRequest } from "next/server";
 import { query } from "@anthropic-ai/claude-code";
 
+export const maxDuration = 300; // 5 minutes
+
 export async function POST(req: NextRequest) {
   try {
     const { prompt } = await req.json();

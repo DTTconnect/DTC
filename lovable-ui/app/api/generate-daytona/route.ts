@@ -2,6 +2,8 @@ import { NextRequest } from "next/server";
 import { spawn } from "child_process";
 import path from "path";
 
+export const maxDuration = 300; // 5 minutes
+
 export async function POST(req: NextRequest) {
   try {
     // Check if running in Vercel serverless environment
