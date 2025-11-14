@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/Navbar";
 
 interface Message {
@@ -13,17 +14,20 @@ interface Message {
   message?: string;
   previewUrl?: string;
   sandboxId?: string;
+  projectId?: string;
 }
 
 export default function GeneratePage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const prompt = searchParams.get("prompt") || "";
-  
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const hasStartedRef = useRef(false);
   
@@ -34,23 +38,61 @@ export default function GeneratePage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-  
+
+  // Check authentication and get organization
+  useEffect(() => {
+    const checkAuth = async () => {
+      const supabase = createClient();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+      if (authError || !user) {
+        // Redirect to login if not authenticated
+        router.push('/auth/login?redirect=/generate?prompt=' + encodeURIComponent(prompt));
+        return;
+      }
+
+      // Get user's default organization
+      const { data: orgs } = await supabase
+        .from('organization_members')
+        .select('organization_id')
+        .eq('user_id', user.id)
+        .limit(1)
+        .single();
+
+      if (!orgs || !orgs.organization_id) {
+        setError('No organization found. Please contact support.');
+        setIsLoadingAuth(false);
+        return;
+      }
+
+      setOrganizationId(orgs.organization_id);
+      setIsLoadingAuth(false);
+    };
+
+    checkAuth();
+  }, [router, prompt]);
+
   useEffect(() => {
     if (!prompt) {
       router.push("/");
       return;
     }
-    
+
+    // Wait for auth check to complete
+    if (isLoadingAuth || !organizationId) {
+      return;
+    }
+
     // Prevent double execution in StrictMode
     if (hasStartedRef.current) {
       return;
     }
     hasStartedRef.current = true;
-    
+
     setIsGenerating(true);
     generateWebsite();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [prompt, router]);
+  }, [prompt, router, isLoadingAuth, organizationId]);
   
   const generateWebsite = async () => {
     try {
@@ -59,7 +101,7 @@ export default function GeneratePage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt, organizationId }),
       });
 
       if (!response.ok) {
@@ -142,12 +184,24 @@ export default function GeneratePage() {
     return JSON.stringify(input).substring(0, 100) + "...";
   };
 
+  // Show loading state while checking auth
+  if (isLoadingAuth) {
+    return (
+      <main className="h-screen bg-black flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading...</p>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="h-screen bg-black flex flex-col overflow-hidden relative">
       <Navbar />
       {/* Spacer for navbar */}
       <div className="h-16" />
-      
+
       <div className="flex-1 flex overflow-hidden">
         {/* Left side - Chat */}
         <div className="w-[30%] flex flex-col border-r border-gray-800">

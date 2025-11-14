@@ -1,9 +1,21 @@
 import { NextRequest } from "next/server";
 import { spawn } from "child_process";
 import path from "path";
+import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
   try {
+    // Check authentication
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized. Please log in." }),
+        { status: 401, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
     // Check if running in Vercel serverless environment
     // Daytona generation requires child_process which is not available in serverless
     if (process.env.VERCEL) {
@@ -15,12 +27,46 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { prompt } = await req.json();
+    const { prompt, organizationId } = await req.json();
 
-    if (!prompt) {
+    if (!prompt || !organizationId) {
       return new Response(
-        JSON.stringify({ error: "Prompt is required" }),
+        JSON.stringify({ error: "Prompt and organizationId are required" }),
         { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    // Verify user is a member of the organization
+    const { data: membership } = await supabase
+      .from("organization_members")
+      .select("*")
+      .eq("organization_id", organizationId)
+      .eq("user_id", user.id)
+      .single();
+
+    if (!membership) {
+      return new Response(
+        JSON.stringify({ error: "You are not a member of this organization" }),
+        { status: 403, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    // Create project record
+    const { data: project, error: projectError } = await supabase
+      .from("projects")
+      .insert({
+        organization_id: organizationId,
+        created_by: user.id,
+        name: prompt.substring(0, 100), // Use first 100 chars of prompt as name
+        prompt: prompt,
+      })
+      .select()
+      .single();
+
+    if (projectError || !project) {
+      return new Response(
+        JSON.stringify({ error: "Failed to create project" }),
+        { status: 500, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -54,6 +100,7 @@ export async function POST(req: NextRequest) {
         let sandboxId = "";
         let previewUrl = "";
         let buffer = "";
+        let dbSandboxId = "";
         
         // Capture stdout
         child.stdout.on("data", async (data) => {
@@ -118,16 +165,37 @@ export async function POST(req: NextRequest) {
                   })}\n\n`)
                 );
                 
-                // Extract sandbox ID
+                // Extract sandbox ID and save to database
                 const sandboxMatch = output.match(/Sandbox created: ([a-f0-9-]+)/);
-                if (sandboxMatch) {
+                if (sandboxMatch && !dbSandboxId) {
                   sandboxId = sandboxMatch[1];
+
+                  // Create sandbox record in database
+                  const { data: sandbox } = await supabase
+                    .from("sandboxes")
+                    .insert({
+                      project_id: project.id,
+                      daytona_sandbox_id: sandboxId,
+                      status: "active",
+                    })
+                    .select()
+                    .single();
+
+                  if (sandbox) {
+                    dbSandboxId = sandbox.id;
+                  }
                 }
                 
-                // Extract preview URL
+                // Extract preview URL and update database
                 const previewMatch = output.match(/Preview URL: (https:\/\/[^\s]+)/);
-                if (previewMatch) {
+                if (previewMatch && dbSandboxId) {
                   previewUrl = previewMatch[1];
+
+                  // Update sandbox record with preview URL
+                  await supabase
+                    .from("sandboxes")
+                    .update({ preview_url: previewUrl })
+                    .eq("id", dbSandboxId);
                 }
               }
             }
@@ -163,16 +231,17 @@ export async function POST(req: NextRequest) {
           child.on("error", reject);
         });
         
-        // Send completion with preview URL
+        // Send completion with preview URL and project ID
         if (previewUrl) {
           await writer.write(
-            encoder.encode(`data: ${JSON.stringify({ 
-              type: "complete", 
+            encoder.encode(`data: ${JSON.stringify({
+              type: "complete",
+              projectId: project.id,
               sandboxId,
-              previewUrl 
+              previewUrl
             })}\n\n`)
           );
-          console.log(`[API] Generation complete. Preview URL: ${previewUrl}`);
+          console.log(`[API] Generation complete. Project: ${project.id}, Preview URL: ${previewUrl}`);
         } else {
           throw new Error("Failed to get preview URL");
         }
