@@ -3,6 +3,22 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import DashboardClient from './DashboardClient'
 
+type OrganizationMember = {
+  organization: {
+    id: string
+    name: string
+    created_at: string
+  }
+  role: string
+}
+
+type Organization = {
+  id: string
+  name: string
+  created_at: string
+  role: string
+}
+
 export default async function DashboardPage() {
   const supabase = await createClient()
 
@@ -27,7 +43,7 @@ export default async function DashboardPage() {
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
-  const orgs = organizations?.map(om => ({
+  const orgs: Organization[] = (organizations as OrganizationMember[] | null)?.map(om => ({
     ...om.organization,
     role: om.role
   })) || []
@@ -36,7 +52,7 @@ export default async function DashboardPage() {
   const defaultOrgId = orgs[0]?.id
 
   // Get projects for the default organization
-  let projects = []
+  let projects: any[] = []
   if (defaultOrgId) {
     const { data: projectsData } = await supabase
       .from('projects')
