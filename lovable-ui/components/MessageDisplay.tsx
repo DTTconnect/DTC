@@ -57,7 +57,7 @@ export default function MessageDisplay({ messages }: MessageDisplayProps) {
         </div>
         
         <div className="space-y-3">
-          {displayMessages.map((message, index) => {
+          {displayMessages.map((message: any, index) => {
             // Assistant messages
             if (message.type === 'assistant' && (message as any).message?.content) {
               const content = (message as any).message.content;
