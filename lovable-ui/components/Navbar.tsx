@@ -1,6 +1,10 @@
 import React from "react";
+import { createClient } from "@/lib/supabase/server";
 
-export default function Navbar() {
+export default async function Navbar() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   return (
     <nav className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-6 py-4">
       {/* Logo & main navigation */}
@@ -15,6 +19,11 @@ export default function Navbar() {
         </a>
 
         <div className="hidden md:flex items-center gap-8 text-sm text-gray-300">
+          {user && (
+            <a href="/dashboard" className="hover:text-white transition-colors">
+              Dashboard
+            </a>
+          )}
           <a href="#" className="hover:text-white transition-colors">
             Community
           </a>
@@ -32,18 +41,32 @@ export default function Navbar() {
 
       {/* Auth buttons */}
       <div className="flex items-center gap-4 text-sm">
-        <a
-          href="#"
-          className="text-gray-300 hover:text-white transition-colors"
-        >
-          Log in
-        </a>
-        <a
-          href="#"
-          className="px-4 py-2 bg-white text-black rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-        >
-          Get started
-        </a>
+        {user ? (
+          <>
+            <span className="text-gray-400">{user.email}</span>
+            <a
+              href="/dashboard"
+              className="px-4 py-2 bg-white text-black rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+            >
+              Dashboard
+            </a>
+          </>
+        ) : (
+          <>
+            <a
+              href="/auth/login"
+              className="text-gray-300 hover:text-white transition-colors"
+            >
+              Log in
+            </a>
+            <a
+              href="/auth/signup"
+              className="px-4 py-2 bg-white text-black rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+            >
+              Get started
+            </a>
+          </>
+        )}
       </div>
     </nav>
   );
