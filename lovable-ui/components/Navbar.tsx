@@ -1,9 +1,33 @@
-import React from "react";
-import { createClient } from "@/lib/supabase/server";
+"use client";
 
-export default async function Navbar() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+import React, { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { User } from "@supabase/supabase-js";
+
+export default function Navbar() {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    // Get initial user
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+      setLoading(false);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   return (
     <nav className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-6 py-4">
@@ -19,7 +43,7 @@ export default async function Navbar() {
         </a>
 
         <div className="hidden md:flex items-center gap-8 text-sm text-gray-300">
-          {user && (
+          {!loading && user && (
             <a href="/dashboard" className="hover:text-white transition-colors">
               Dashboard
             </a>
@@ -41,7 +65,9 @@ export default async function Navbar() {
 
       {/* Auth buttons */}
       <div className="flex items-center gap-4 text-sm">
-        {user ? (
+        {loading ? (
+          <div className="h-10 w-32 animate-pulse bg-gray-800 rounded-lg" />
+        ) : user ? (
           <>
             <span className="text-gray-400">{user.email}</span>
             <a
