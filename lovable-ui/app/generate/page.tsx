@@ -153,7 +153,7 @@ export default function GeneratePage() {
         <div className="w-[30%] flex flex-col border-r border-gray-800">
           {/* Header */}
           <div className="p-4 border-b border-gray-800">
-            <h2 className="text-white font-semibold">Lovable</h2>
+            <h2 className="text-white font-semibold">DTC</h2>
             <p className="text-gray-400 text-sm mt-1 break-words">{prompt}</p>
           </div>
           
@@ -165,9 +165,9 @@ export default function GeneratePage() {
                   <div className="bg-gray-900 rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center">
-                        <span className="text-white text-xs">L</span>
+                        <span className="text-white text-xs">D</span>
                       </div>
-                      <span className="text-white font-medium">Lovable</span>
+                      <span className="text-white font-medium">DTC</span>
                     </div>
                     <p className="text-gray-300 whitespace-pre-wrap break-words">{message.content}</p>
                   </div>
@@ -211,7 +211,7 @@ export default function GeneratePage() {
             <div className="flex items-center gap-2">
               <input
                 type="text"
-                placeholder="Ask Lovable..."
+                placeholder="Ask DTC..."
                 className="flex-1 px-4 py-2 bg-gray-900 text-white rounded-lg border border-gray-800 focus:outline-none focus:border-gray-700"
                 disabled={isGenerating}
               />
