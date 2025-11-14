@@ -23,8 +23,8 @@ export default function MessageDisplay({ messages }: MessageDisplayProps) {
         return match ? `/${match[1]}` : null;
       })
       .filter(Boolean);
-    
-    setGeneratedPages([...new Set(pages)]);
+
+    setGeneratedPages(Array.from(new Set(pages)));
   }, [messages]);
   
   if (messages.length === 0) return null;
