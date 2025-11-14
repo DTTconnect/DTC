@@ -17,7 +17,8 @@ async function removeSandbox(sandboxId: string) {
 
   try {
     console.log(`Removing sandbox: ${sandboxId}...`);
-    await daytona.remove(sandboxId);
+    // Type cast as the SDK might not have proper types exported
+    await (daytona as any).remove(sandboxId);
     console.log("✓ Sandbox removed successfully");
   } catch (error: any) {
     console.error("Failed to remove sandbox:", error.message);
