@@ -45,15 +45,16 @@ export async function POST(req: NextRequest) {
           }
         })) {
           messageCount++;
-          console.log(`[API] Message ${messageCount} - Type: ${message.type}`);
-          
+          const msg = message as any;
+          console.log(`[API] Message ${messageCount} - Type: ${msg.type}`);
+
           // Log specific details based on message type
-          if (message.type === 'tool_use') {
-            console.log(`[API] Tool use: ${(message as any).name}`);
-          } else if (message.type === 'result') {
-            console.log(`[API] Result: ${(message as any).subtype}`);
+          if (msg.type === 'tool_use') {
+            console.log(`[API] Tool use: ${msg.name}`);
+          } else if (msg.type === 'result') {
+            console.log(`[API] Result: ${msg.subtype}`);
           }
-          
+
           // Send the message to the client
           await writer.write(
             encoder.encode(`data: ${JSON.stringify(message)}\n\n`)
