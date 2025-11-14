@@ -8,7 +8,16 @@ This guide will help you deploy your Lovable Clone to Vercel.
 - Your GitHub repository pushed
 - API keys ready:
   - Anthropic API key from [console.anthropic.com](https://console.anthropic.com/dashboard)
-  - Daytona API key from [daytona.io](https://www.daytona.io/)
+  - (Optional) Daytona API key from [daytona.io](https://www.daytona.io/) - only needed for local development
+
+## Important: Deployment Configuration
+
+The project has been automatically configured with a root `vercel.json` that:
+- Sets the build directory to `lovable-ui/`
+- Configures API route timeouts (5 minutes)
+- Handles routing properly
+
+**You don't need to manually configure the root directory** - it's already set up!
 
 ## Option 1: Deploy via Vercel Dashboard (Easiest)
 
@@ -21,10 +30,9 @@ This guide will help you deploy your Lovable Clone to Vercel.
    - Vercel will auto-detect it's a Next.js project
 
 3. **Configure Project Settings**
-   - Set **Root Directory** to: `lovable-ui`
+   - Leave **Root Directory** as default (root) - our `vercel.json` handles this
    - Framework Preset: Next.js (auto-detected)
-   - Build Command: `npm run build` (auto-filled)
-   - Output Directory: `.next` (auto-filled)
+   - Build settings will be read from `vercel.json` automatically
 
 4. **Add Environment Variables**
    Click "Environment Variables" and add:
@@ -97,6 +105,19 @@ Your app will be live at: `https://your-project.vercel.app`
 - **Timeouts**: Vercel functions have a 5-minute timeout (already configured in `vercel.json`)
 - **Environment Variables**: Never commit your `.env` file - always use Vercel's environment variable settings
 - **Custom Domain**: You can add a custom domain in Vercel's project settings
+
+### ⚠️ Daytona Integration Limitation
+
+**The `/api/generate-daytona` endpoint is NOT available on Vercel** due to serverless environment limitations:
+- Vercel's serverless functions don't support `child_process.spawn`
+- Daytona sandbox creation requires running external scripts
+
+**Solutions:**
+1. **Use `/api/generate` endpoint** - Works on Vercel, generates code directly
+2. **Run locally** - The Daytona integration works perfectly in local development (`npm run dev`)
+3. **Deploy to a different platform** - Consider Railway, Render, or Fly.io which support full Node.js environments
+
+For most use cases, the `/api/generate` endpoint provides sufficient functionality for code generation on Vercel.
 
 ## Troubleshooting
 

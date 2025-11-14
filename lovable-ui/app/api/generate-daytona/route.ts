@@ -4,22 +4,33 @@ import path from "path";
 
 export async function POST(req: NextRequest) {
   try {
+    // Check if running in Vercel serverless environment
+    // Daytona generation requires child_process which is not available in serverless
+    if (process.env.VERCEL) {
+      return new Response(
+        JSON.stringify({
+          error: "Daytona generation is not available in serverless environments. Please use the /api/generate endpoint instead, or run this locally."
+        }),
+        { status: 501, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
     const { prompt } = await req.json();
-    
+
     if (!prompt) {
       return new Response(
         JSON.stringify({ error: "Prompt is required" }),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
-    
+
     if (!process.env.DAYTONA_API_KEY || !process.env.ANTHROPIC_API_KEY) {
       return new Response(
         JSON.stringify({ error: "Missing API keys" }),
         { status: 500, headers: { "Content-Type": "application/json" } }
       );
     }
-    
+
     console.log("[API] Starting Daytona generation for prompt:", prompt);
     
     // Create a streaming response

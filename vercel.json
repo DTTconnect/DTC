@@ -3,5 +3,16 @@
   "installCommand": "cd lovable-ui && npm install",
   "devCommand": "cd lovable-ui && npm run dev",
   "outputDirectory": "lovable-ui/.next",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "functions": {
+    "lovable-ui/app/api/**/*.ts": {
+      "maxDuration": 300
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/lovable-ui/$1"
+    }
+  ]
 }
