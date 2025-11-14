@@ -30,7 +30,7 @@ export default function MessageDisplay({ messages }: MessageDisplayProps) {
   if (messages.length === 0) return null;
   
   // Filter to show only assistant messages and tool uses
-  const displayMessages = messages.filter(m => 
+  const displayMessages = messages.filter((m: any) =>
     m.type === 'assistant' || m.type === 'tool_use' || m.type === 'result'
   );
   
