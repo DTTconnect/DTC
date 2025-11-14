@@ -10,14 +10,9 @@ This guide will help you deploy your Lovable Clone to Vercel.
   - Anthropic API key from [console.anthropic.com](https://console.anthropic.com/dashboard)
   - (Optional) Daytona API key from [daytona.io](https://www.daytona.io/) - only needed for local development
 
-## Important: Deployment Configuration
+## Important: Root Directory Configuration
 
-The project has been automatically configured with a root `vercel.json` that:
-- Sets the build directory to `lovable-ui/`
-- Configures API route timeouts (5 minutes)
-- Handles routing properly
-
-**You don't need to manually configure the root directory** - it's already set up!
+⚠️ **CRITICAL**: Your Next.js app is in the `lovable-ui/` subdirectory, so you MUST configure the Root Directory setting in Vercel.
 
 ## Option 1: Deploy via Vercel Dashboard (Easiest)
 
@@ -26,13 +21,16 @@ The project has been automatically configured with a root `vercel.json` that:
    - Click "Import Project"
 
 2. **Connect Your Repository**
-   - Select your GitHub repository
-   - Vercel will auto-detect it's a Next.js project
+   - Select your GitHub repository: `DTTconnect/DTC`
+   - Click "Import"
 
-3. **Configure Project Settings**
-   - Leave **Root Directory** as default (root) - our `vercel.json` handles this
+3. **⚠️ IMPORTANT: Configure Root Directory**
+   - Click "Edit" next to "Root Directory"
+   - Enter: `lovable-ui`
+   - Vercel will now auto-detect it's a Next.js project
    - Framework Preset: Next.js (auto-detected)
-   - Build settings will be read from `vercel.json` automatically
+   - Build Command: `npm run build` (auto-filled)
+   - Output Directory: `.next` (auto-filled)
 
 4. **Add Environment Variables**
    Click "Environment Variables" and add:
