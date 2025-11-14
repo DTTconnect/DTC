@@ -1,0 +1,7 @@
+{
+  "buildCommand": "cd lovable-ui && npm run build",
+  "installCommand": "cd lovable-ui && npm install",
+  "devCommand": "cd lovable-ui && npm run dev",
+  "outputDirectory": "lovable-ui/.next",
+  "framework": "nextjs"
+}
