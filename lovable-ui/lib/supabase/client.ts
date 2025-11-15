@@ -1,5 +1,5 @@
-import { createBrowserClient, type SupabaseClient } from '@supabase/ssr'
-import type { AuthChangeEvent, Session, UserResponse } from '@supabase/supabase-js'
+import { createBrowserClient } from '@supabase/ssr'
+import type { AuthChangeEvent, Session, UserResponse, SupabaseClient } from '@supabase/supabase-js'
 
 export function createClient(): SupabaseClient {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
