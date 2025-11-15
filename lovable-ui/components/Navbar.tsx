@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { User } from "@supabase/supabase-js";
+import { User, UserResponse } from "@supabase/supabase-js";
 
 export default function Navbar() {
   const [user, setUser] = useState<User | null>(null);
@@ -12,8 +12,8 @@ export default function Navbar() {
     const supabase = createClient();
 
     // Get initial user
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
+    supabase.auth.getUser().then((response: UserResponse) => {
+      setUser(response.data.user);
       setLoading(false);
     });
 
