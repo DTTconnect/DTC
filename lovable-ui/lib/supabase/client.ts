@@ -14,7 +14,7 @@ export function createClient(): SupabaseClient {
         getUser: async () => ({
           data: { user: null },
           error: null
-        } as UserResponse),
+        } as unknown as UserResponse),
         onAuthStateChange: (callback: (event: AuthChangeEvent, session: Session | null) => void) => ({
           data: {
             subscription: {
