@@ -11,10 +11,10 @@ export function createClient(): SupabaseClient {
     // Return a minimal mock client to prevent crashes with proper typing
     return {
       auth: {
-        getUser: async (): Promise<UserResponse> => ({
+        getUser: async () => ({
           data: { user: null },
           error: null
-        }),
+        } as UserResponse),
         onAuthStateChange: (callback: (event: AuthChangeEvent, session: Session | null) => void) => ({
           data: {
             subscription: {
