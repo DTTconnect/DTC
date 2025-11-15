@@ -31,10 +31,10 @@ export default function Home() {
         <div className="max-w-4xl mx-auto text-center">
           {/* Hero Section */}
           <h1 className="text-4xl sm:text-4xl md:text-4xl font-bold text-white mb-6">
-            Build something with Lovable-clone
+            Build something with Designed to Code
           </h1>
           <h3 className="text-xl sm:text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
-            BUILT WITH CLAUDE CODE
+            AI-POWERED DEVELOPMENT PLATFORM
           </h3>
 
           <p className="text-xl sm:text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
@@ -47,7 +47,7 @@ export default function Home() {
             <div className="relative flex items-center bg-black rounded-2xl border border-gray-800 shadow-2xl px-2">
               {/* Textarea */}
               <textarea
-                placeholder="Ask Lovable to create a prototype..."
+                placeholder="Ask DTC to create a prototype..."
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 onKeyDown={(e) => {
