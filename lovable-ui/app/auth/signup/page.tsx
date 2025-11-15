@@ -72,7 +72,8 @@ export default function SignUpPage() {
           {success && (
             <div className="mb-6 p-4 bg-green-500/20 border border-green-500/50 rounded-lg">
               <p className="text-green-200 text-sm">
-                Account created successfully! Check your email to verify your account.
+                Account created successfully! Your account is pending approval from an administrator.
+                You will be able to access the dashboard once your account has been approved.
               </p>
             </div>
           )}
