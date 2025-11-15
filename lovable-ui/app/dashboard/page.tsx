@@ -29,6 +29,35 @@ export default async function DashboardPage() {
     redirect('/auth/login')
   }
 
+  // Check if user is approved
+  const { data: userProfile } = await supabase
+    .from('user_profiles')
+    .select('is_approved, is_superadmin')
+    .eq('id', user.id)
+    .single()
+
+  if (!userProfile?.is_approved) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 flex items-center justify-center">
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-white/20 max-w-md">
+          <h1 className="text-2xl font-bold text-white mb-4">Account Pending Approval</h1>
+          <p className="text-gray-300 mb-6">
+            Your account is currently pending approval from an administrator.
+            You will receive access once your account has been reviewed and approved.
+          </p>
+          <form method="post" action="/auth/signout">
+            <button
+              type="submit"
+              className="w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200"
+            >
+              Sign Out
+            </button>
+          </form>
+        </div>
+      </div>
+    )
+  }
+
   // Get user's organizations
   const { data: organizations } = await supabase
     .from('organization_members')
