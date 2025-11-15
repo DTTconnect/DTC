@@ -1,4 +1,5 @@
 import { createBrowserClient, type SupabaseClient } from '@supabase/ssr'
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js'
 
 export function createClient(): SupabaseClient {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -7,13 +8,22 @@ export function createClient(): SupabaseClient {
   // Return a mock client if environment variables are not configured
   if (!supabaseUrl || !supabaseAnonKey) {
     console.warn('Supabase environment variables not configured')
-    // Return a minimal mock client to prevent crashes
+    // Return a minimal mock client to prevent crashes with proper typing
     return {
       auth: {
-        getUser: async () => ({ data: { user: null }, error: null }),
-        onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } })
+        getUser: async () => ({
+          data: { user: null as any },
+          error: null
+        }),
+        onAuthStateChange: (callback: (event: AuthChangeEvent, session: Session | null) => void) => ({
+          data: {
+            subscription: {
+              unsubscribe: () => {}
+            }
+          }
+        })
       }
-    } as SupabaseClient
+    } as unknown as SupabaseClient
   }
 
   return createBrowserClient(
